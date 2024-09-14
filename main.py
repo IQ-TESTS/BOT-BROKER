@@ -98,14 +98,23 @@ async def main(page: ft.Page):
         "LemonMilkBold": "fonts/LemonMilkBold.otf",
     }
 
-    ensure_data()
-
     async def route_change(route):
         page.views.clear()
 
+
         # Приветственная страница
         if page.route == "/home":
+
+            page.views.append(
+                ft.View(
+                    ft.Text("Hello! Wait a moment...")
+                )
+            )
+
+            ensure_data()
+            
             data = get_json("shares_list")
+            
 
             shares_list = ft.Column(
                 controls=[],
@@ -157,6 +166,8 @@ async def main(page: ft.Page):
                     page
                 )
                 shares_list.controls.append(scc.create_card())
+
+            page.views.clear()
 
             # Add the sorted share cards to the view
             page.views.append(
