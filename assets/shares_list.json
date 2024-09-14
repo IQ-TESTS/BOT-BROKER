@@ -1,0 +1,54 @@
+{
+    "shares": [
+        {
+            "ticker": "SKAS",
+            "name": "Saker Aviation Servies inc",
+            "image": "https://media.licdn.com/dms/image/v2/C4D0BAQHFrM1oSmZf7Q/company-logo_200_200/company-logo_200_200/0/1631348318578?e=2147483647&v=beta&t=a5haqmYXMh3xSbD-MeG9tZNDIqevmznAvEoHaWve3v8",
+            "price_dollars": 10.2,
+            "change_day": 0.0,
+            "prediction": "Keep",
+            "confidence": 1,
+            "new": true
+        },
+        {
+            "ticker": "DVCMY",
+            "name": "Davide Campari-Milano N.V.",
+            "image": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAC0AOAMBIgACEQEDEQH/xAAaAAEBAQEBAQEAAAAAAAAAAAAABQQHAQYD/8QAKxAAAQMDAwQCAgEFAAAAAAAAAQIDBAAFEQYSIRMiMUEUURVhkQcWJDKB/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AO40qVM1LY4NxRbpl3hMTV4CWHH0pXz44J9+vutK7rAbuaLYuWyme431URisb1I57gPrg8/qg2Uqf+ctfypcX58f5ENvqSWt43Moxncoehgg1ke1dpxiJHlvXuC3Gk7ug8p9IS7tOFbT7weDQW6VMc1BZm4Macu5xBElLDbD/VBQ6o5wlJ9ng8fqvbvqCz2VTSbvcosIuglv5DoRvx5xnz5H80FKlYE3q2LRDWifHWicdsVSHAQ8fpJHmlB8jBs14td0vEVViiXSJc56paZ7shKemlWO1xJBUdmO3bn1/rUyfpTUEm/SdWoCU3di4NqhwSpvuio7NvUz27kLcJH3/wArp58VxuwWyZDutpXL09Je1Em4k3K4OsvnIUsjqIdGGy3sIG0/xkZoKV70Bc7zqy8XRl5cFuc6yy6oOJJkQi0lLzeAThW5Ax481+Ft0NexbtGQXN8E2tc4ynmHGlqZS4VbNoVkKzkA8HHPupNs0xc2NSM3NdsMWKdQvrXMYhPfLQgLKkZwcFlY7SraQAea2otEwTEoNluv94C79VV42q6BY6ud3Uzt6fS7en98YoKNz/pu7PdbtKZDjdnisPOpkPdNxciW8e5e0YCdo8HAwc4/em66e1Pf1aYekLVbp8KHJblyUKacCXVJSEq2nO5KijJxyM+qlrtk9D0qwfgZpdf1V+RTJEf/ABvjlwL3FzxnaMY8+q8XoSffdV3+U2iPbkfk0ranORXRJACUEqZXuCcEgjOD7oLdo0zc4cLSLCoKkOW2c49OUX0KClKQsKWnkcFS8gYBA4x9+V0SlApSlApSlApSlApSlB//2Q==",
+            "price_dollars": 8.78,
+            "change_day": -5.59,
+            "prediction": "Buy",
+            "confidence": 0.8,
+            "new": false
+        },
+        {
+            "ticker": "^BVSP",
+            "name": "IBOVESPA",
+            "image": "https://s3-symbol-logo.tradingview.com/b3-on-nm--600.png",
+            "price_dollars": 134881.95,
+            "change_day": 0.64,
+            "prediction": "Sell",
+            "confidence": 0.05,
+            "new": false
+        },
+        {
+            "ticker": "GRMN",
+            "name": "Garmin ltd",
+            "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTk2K7lhN9C1Hp5wzrgaVVJaWHlpFOSA6eywQ&s",
+            "price_dollars": 172.68,
+            "change_day": -5.13,
+            "prediction": "Buy",
+            "confidence": 0.69,
+            "new": false
+        },
+        {
+            "ticker": "PNRG",
+            "name": "PrimeEnergy Resources Corporation",
+            "image": "https://media.licdn.com/dms/image/C4E1BAQFmS2rHdS0SEA/company-background_10000/0/1585110248426/prime_energy_resources_cover?e=2147483647&v=beta&t=qlUhgjzbV-qrRQxVKsPyAFYhD8SoL4Ame9v5fTdTLNM&s",
+            "price_dollars": null,
+            "change_day": null,
+            "prediction": "N/A",
+            "confidence": "N/A",
+            "new": false
+        }
+    ]
+}
