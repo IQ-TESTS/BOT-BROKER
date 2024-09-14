@@ -2,8 +2,7 @@ import flet as ft
 import json
 
 
-
-def main(page: Page): 
+def main(page: ft.Page):
     def create_card(name, image, price_dollars, change_day, prediction, confidence, new):
         # Define default text based on the 'new' status
         if new:
@@ -45,101 +44,96 @@ def main(page: Page):
                     ]
                 ),
                 height=115,
-                width=self.page.window.width + 200,
+                width=page.window.width + 200,
                 padding=10,
             )
         )
-         
-    with open("shares_list.json", "r") as file:
+
+    with open("assets/shares_list.json", "r") as file:
         data = json.load(file)
 
     shares_list = ft.Column(
-                controls=[],
-                expand=True,
-                scroll=ft.ScrollMode.AUTO
-            )
+        controls=[],
+        expand=True,
+        scroll=ft.ScrollMode.AUTO
+    )
 
-            shares_data = data.get("shares", [])
+    shares_data = data.get("shares", [])
 
-            # Separate valid and invalid shares
-            valid_shares = []
-            no_data_shares = []
+    # Separate valid and invalid shares
+    valid_shares = []
+    no_data_shares = []
 
-            for share in shares_data:
-                if isinstance(share.get("confidence"), (int, float)) and isinstance(share.get("price_dollars"),
-                                                                                    (int, float)):
-                    valid_shares.append(share)
-                else:
-                    no_data_shares.append(share)
-                    print("Invalid share data:", share)
+    for share in shares_data:
+        if isinstance(share.get("confidence"), (int, float)) and isinstance(share.get("price_dollars"),
+                                                                            (int, float)):
+            valid_shares.append(share)
+        else:
+            no_data_shares.append(share)
+            print("Invalid share data:", share)
 
-            # Sort the valid shares by confidence in descending order
-            sorted_shares = sorted(valid_shares, key=lambda x: x.get("confidence", 0), reverse=True)
+    # Sort the valid shares by confidence in descending order
+    sorted_shares = sorted(valid_shares, key=lambda x: x.get("confidence", 0), reverse=True)
 
-            # Create cards for sorted shares
-            for share in sorted_shares:
-                scc = creeate_card(
-                    share.get("name"),
-                    share.get("image"),
-                    share.get("price_dollars"),
-                    share.get("change_day"),
-                    share.get("prediction"),
-                    share.get("confidence"),
-                    share.get("new"),
-                    page
-                )
-                shares_list.controls.append(scc)
+    # Create cards for sorted shares
+    for share in sorted_shares:
+        scc = create_card(
+            share.get("name"),
+            share.get("image"),
+            share.get("price_dollars"),
+            share.get("change_day"),
+            share.get("prediction"),
+            share.get("confidence"),
+            share.get("new"),
+        )
+        shares_list.controls.append(scc)
 
-            # Optionally, you can display cards for no_data_shares separately if needed
-            for share in no_data_shares:
-                scc = create_card(
-                    share.get("name"),
-                    share.get("image"),
-                    share.get("price_dollars"),
-                    share.get("change_day"),
-                    share.get("prediction"),
-                    share.get("confidence"),
-                    share.get("new"),
-                    page
-                )
-                shares_list.controls.append(scc)
+    # Optionally, you can display cards for no_data_shares separately if needed
+    for share in no_data_shares:
+        scc = create_card(
+            share.get("name"),
+            share.get("image"),
+            share.get("price_dollars"),
+            share.get("change_day"),
+            share.get("prediction"),
+            share.get("confidence"),
+            share.get("new"),
+        )
+        shares_list.controls.append(scc)
 
-            page.views.clear()
 
-            # Add the sorted share cards to the view
-            page.add(
-                ft.Container(
-                    controls=[
-                        ft.Text("Bot Broker", font_family="LemonMilkBold", size=50),
-                        ft.Text(" "),
-                        shares_list,
-                        ft.Card(
-                            content=ft.Column(
+    # Add the sorted share cards to the view
+    page.add(
+        ft.Column(
+            controls=[
+                ft.Text("Bot Broker", font_family="LemonMilkBold", size=50),
+                ft.Text(" "),
+                shares_list,
+                ft.Card(
+                    content=ft.Column(
+                        controls=[
+                            ft.Row(
                                 controls=[
-                                    ft.Row(
-                                        controls=[
-                                            ft.Text("Help project:", font_family="LemonMilkBold"),
-                                            ft.TextButton("@botbroker_helpproject",
-                                                          url="https://t.me/botbroker_helpproject")
-                                        ]
-                                    ),
-                                    ft.Row(
-                                        controls=[
-                                            ft.Text("Need help?:", font_family="LemonMilkBold"),
-                                            ft.TextButton("@botbroker_helpusers",
-                                                          url="https://t.me/botbroker_helpusers")
-                                        ]
-                                    )
+                                    ft.Text("Help project:", font_family="LemonMilkBold"),
+                                    ft.TextButton("@botbroker_helpproject",
+                                                  url="https://t.me/botbroker_helpproject")
+                                ]
+                            ),
+                            ft.Row(
+                                controls=[
+                                    ft.Text("Need help?:", font_family="LemonMilkBold"),
+                                    ft.TextButton("@botbroker_helpusers",
+                                                  url="https://t.me/botbroker_helpusers")
                                 ]
                             )
-                        )
-                    ],
-                    vertical_alignment=ft.MainAxisAlignment.START,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                        ]
+                    )
                 )
-            )
+            ],
+        )
+    )
 
-            page.update()
+    page.update()
 
 
-flet.app(target=main, assets_dir="assets")
+ft.app(target=main, assets_dir="assets")
