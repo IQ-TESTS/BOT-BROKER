@@ -1,34 +1,26 @@
 import flet as ft
 import json
 
-class share_card_creator:
-    def __init__(self, name, image, price_dollars, change_day, prediction, confidence, new, page):
-        self.name = name
-        self.image = image
-        self.price_dollars = price_dollars
-        self.change_day = change_day
-        self.prediction = prediction
-        self.confidence = confidence
-        self.new = new
-        self.page = page
 
-    def create_card(self):
+
+def main(page: Page): 
+    def create_card(name, image, price_dollars, change_day, prediction, confidence, new):
         # Define default text based on the 'new' status
-        if self.new:
+        if new:
             new_text = ft.Text("Recently listed in an IPO", color=ft.colors.GREEN)
         else:
             new_text = ft.Text("")
 
         # Check if confidence and price are integers
         confidence_text = (
-            str(round(self.confidence * 100, 2)) + "%"
-            if isinstance(self.confidence, (int, float))
+            str(round(confidence * 100, 2)) + "%"
+            if isinstance(confidence, (int, float))
             else "N/A"
         )
 
         price_text = (
-            str(self.price_dollars) + "$"
-            if isinstance(self.price_dollars, (int, float))
+            str(price_dollars) + "$"
+            if isinstance(price_dollars, (int, float))
             else "N/A"
         )
 
@@ -37,16 +29,16 @@ class share_card_creator:
                 content=ft.Column(
                     [
                         ft.ListTile(
-                            leading=ft.Image(src=self.image),
-                            title=ft.Text(self.name),
+                            leading=ft.Image(src=image),
+                            title=ft.Text(name),
                             subtitle=new_text
                         ),
                         ft.Row(
                             [
-                                ft.Text("Prediction: " + self.prediction),
+                                ft.Text("Prediction: " + prediction),
                                 ft.Text("Confidence: " + confidence_text),
                                 ft.Text("Price: " + price_text),
-                                self.change_text()
+                                ft.Text(str(change_day) + "%", color=ft.colors.RED)
                             ],
                             alignment=ft.MainAxisAlignment.END,
                         ),
@@ -57,20 +49,7 @@ class share_card_creator:
                 padding=10,
             )
         )
-
-    def change_text(self):
-        try:
-            if(self.change_day < 0):
-                return ft.Text(str(self.change_day) + "%", color=ft.colors.RED)
-            elif(self.change_day == 0):
-                return ft.Text("+" + str(self.change_day) + "%", color=ft.colors.ORANGE)
-            else:
-                return ft.Text("+" + str(self.change_day) + "%", color=ft.colors.GREEN)
-        except:
-            return ft.Text("+/- N/A")
-
-
-def main(page: Page):
+         
     with open("shares_list.json", "r") as file:
         data = json.load(file)
 
@@ -80,7 +59,7 @@ def main(page: Page):
                 scroll=ft.ScrollMode.AUTO
             )
 
-            shares_data = data.load_json().get("shares", [])
+            shares_data = data.get("shares", [])
 
             # Separate valid and invalid shares
             valid_shares = []
@@ -99,7 +78,7 @@ def main(page: Page):
 
             # Create cards for sorted shares
             for share in sorted_shares:
-                scc = share_card_creator(
+                scc = creeate_card(
                     share.get("name"),
                     share.get("image"),
                     share.get("price_dollars"),
@@ -109,11 +88,11 @@ def main(page: Page):
                     share.get("new"),
                     page
                 )
-                shares_list.controls.append(scc.create_card())
+                shares_list.controls.append(scc)
 
             # Optionally, you can display cards for no_data_shares separately if needed
             for share in no_data_shares:
-                scc = share_card_creator(
+                scc = create_card(
                     share.get("name"),
                     share.get("image"),
                     share.get("price_dollars"),
@@ -123,7 +102,7 @@ def main(page: Page):
                     share.get("new"),
                     page
                 )
-                shares_list.controls.append(scc.create_card())
+                shares_list.controls.append(scc)
 
             page.views.clear()
 
