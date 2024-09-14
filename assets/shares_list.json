@@ -39,16 +39,6 @@
             "prediction": "Buy",
             "confidence": 0.69,
             "new": false
-        },
-        {
-            "ticker": "PNRG",
-            "name": "PrimeEnergy Resources Corporation",
-            "image": "https://media.licdn.com/dms/image/C4E1BAQFmS2rHdS0SEA/company-background_10000/0/1585110248426/prime_energy_resources_cover?e=2147483647&v=beta&t=qlUhgjzbV-qrRQxVKsPyAFYhD8SoL4Ame9v5fTdTLNM&s",
-            "price_dollars": null,
-            "change_day": null,
-            "prediction": "N/A",
-            "confidence": "N/A",
-            "new": false
         }
     ]
 }
