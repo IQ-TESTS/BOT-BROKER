@@ -105,13 +105,7 @@ async def main(page: ft.Page):
         # Приветственная страница
         if page.route == "/home":
 
-            page.views.append(
-                ft.View(
-                    ft.Text("Hello! Wait a moment...")
-                )
-            )
 
-            ensure_data()
             
             data = get_json("shares_list")
             
@@ -167,7 +161,6 @@ async def main(page: ft.Page):
                 )
                 shares_list.controls.append(scc.create_card())
 
-            page.views.clear()
 
             # Add the sorted share cards to the view
             page.views.append(
