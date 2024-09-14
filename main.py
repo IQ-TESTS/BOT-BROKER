@@ -86,13 +86,10 @@ async def main(page: ft.Page):
     # Настройки приложения по умолчанию
     page.title = "BotBroker"
     page.theme_mode = "dark"
-    page.window.full_screen = True
 
     page.window.width = 900
     page.window.height = 650
 
-
-    page.on_resize = lambda _: page.update()
 
     page.fonts = {
         "LemonMilkBold": "fonts/LemonMilkBold.otf",
@@ -104,8 +101,6 @@ async def main(page: ft.Page):
 
         # Приветственная страница
         if page.route == "/home":
-
-
             
             data = get_json("shares_list")
             
