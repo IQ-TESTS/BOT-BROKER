@@ -1,12 +1,16 @@
-import requests
+import aiohttp
+import asyncio
 from bs4 import BeautifulSoup
 
-def get_share_info(ticker):
+async def get_share_info(ticker):
     url = f'https://finance.yahoo.com/quote/{ticker}'
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-
     share_info = {}
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            content = await response.text()
+
+    soup = BeautifulSoup(content, 'html.parser')
 
     # Extract current price
     price_tag = soup.find('fin-streamer', {'data-field': 'regularMarketPrice'})
@@ -39,5 +43,3 @@ def get_share_info(ticker):
         share_info['percentage_change'] = None
 
     return share_info
-
-print(get_share_info("PRIM.TA"))
