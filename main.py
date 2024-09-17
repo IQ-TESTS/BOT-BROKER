@@ -1,6 +1,7 @@
 import flet as ft
 import json
 import random
+import time
 from ShareInfoParser import get_share_info
 
 
@@ -25,7 +26,7 @@ class share_card_creator:
 
         # Check if confidence and price are integers
         confidence_text = (
-            str(round(self.confidence * 100, 2)) + "%"
+            str(round(self.confidence * 100, 3)) + "%"
             if isinstance(self.confidence, (int, float))
             else "N/A"
         )
@@ -102,10 +103,55 @@ async def main(page: ft.Page):
     async def route_change(route):
         page.views.clear()
 
+        # if page.route == "/welcome":
+        #     page.views.append(
+        #         ft.View(
+        #             route="/welcome",
+        #             controls=[
+        #                 ft.Text("Bot Broker", font_family="LemonMilkBold", size=50),
+        #
+        #                 ft.Text(" "),
+        #                 ft.Text(" "),
+        #
+        #                 ft.Text("#1 AI POWERED BROKER", font_family="LemonMilkBold", size=30),
+        #                 ft.Text(" "),
+        #                 ft.Text("NEVER BEEN SO EASY", font_family="LemonMilkBold", size=30),
+        #
+        #                 ft.Text(" "),
+        #                 ft.Text(" "),
+        #
+        #                 ft.ElevatedButton("USE NOW")
+        #
+        #
+        #                 # ft.Row(
+        #                 #     controls=[ft.Text("#1 AI POWERED BROKER", font_family="LemonMilkBold", size=30), ft.Image(src="AI-LOGO.png", width=400, height=400)],
+        #                 #     alignment=ft.MainAxisAlignment.CENTER
+        #                 # )
+        #             ],
+        #             vertical_alignment=ft.MainAxisAlignment.START,
+        #             horizontal_alignment=ft.CrossAxisAlignment.CENTER
+        #         )
+        #     )
+
         # Приветственная страница
         if page.route == "/home":
 
-            ensure_data()
+            page.views.append(
+                ft.View(
+                    route="/home",
+                    controls=[
+                        ft.Text("Updating data...", font_family="LemonMilkBold", size=30),
+                        ft.ProgressBar(),
+                    ],
+                    spacing=50,
+                    vertical_alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                )
+            )
+
+            page.update()
+
+            await ensure_data()
 
             data = get_json("shares_list")
 
@@ -168,6 +214,7 @@ async def main(page: ft.Page):
                     route='/home',
                     controls=[
                         ft.Text("Bot Broker", font_family="LemonMilkBold", size=50),
+                        ft.Text("AI-POWERED", font_family="LemonMilkBold", size=15),
                         ft.Text(" "),
                         shares_list,
                         ft.Card(
@@ -212,59 +259,58 @@ async def main(page: ft.Page):
     await page.go_async('/home')
 
 
-def ensure_data():
-        data = get_json("shares_list")
-        loaded_data = data.load_json()
+async def ensure_data():
+    data = get_json("shares_list")
+    loaded_data = data.load_json()
 
-        # Iterate through each share in the loaded data
-        for share in loaded_data.get("shares", []):
-            try:
-                ticker = share.get("ticker")  # Adjust based on your actual JSON structure
-                parsed_data = get_share_info(ticker)
-                print(parsed_data)
+    # Iterate through each share in the loaded data
+    for share in loaded_data.get("shares", []):
+        try:
+            ticker = share.get("ticker")  # Adjust based on your actual JSON structure
+            parsed_data = await get_share_info(ticker)  # Make sure get_share_info is async if necessary
+            print(parsed_data)
 
-                # Update the dictionary with the new data
-                share["price_dollars"] = parsed_data.get("price")
-                share["change_day"] = parsed_data.get("percentage_change")
+            # Update the dictionary with the new data
+            share["price_dollars"] = parsed_data.get("price")
+            share["change_day"] = parsed_data.get("percentage_change")
 
-                def clamp_confidence(confidence):
-                    # Ensure the confidence is between 0.05 and 9.9
-                    return max(0.05, min(confidence, 9.93))
+            def clamp_confidence(confidence):
+                # Ensure the confidence is between 0.05 and 9.9
+                return max(0.05, min(confidence, 9.93))
 
-                if share.get("change_day") > 0 and share.get("change_day") <= 1:
-                    share["prediction"] = "Sell"
-                    confidence = round(share.get("change_day"), 2) - round(random.uniform(0.1, 0.9), 2)
-                    share["confidence"] = clamp_confidence(confidence)
+            if share.get("change_day") > 0 and share.get("change_day") <= 1:
+                share["prediction"] = "Sell"
+                confidence = round(share.get("change_day"), 4) - round(random.uniform(0.01, 0.1), 4)
+                share["confidence"] = clamp_confidence(confidence)
 
-                elif share.get("change_day") > 1:
-                    share["prediction"] = "Sell"
-                    confidence = 1 - round(random.uniform(0.1, 2.9), 2)
-                    share["confidence"] = clamp_confidence(confidence)
+            elif share.get("change_day") > 1:
+                share["prediction"] = "Sell"
+                confidence = 1 - round(random.uniform(0.01, 0.1), 4)
+                share["confidence"] = clamp_confidence(confidence)
 
-                elif share.get("change_day") < 0 and share.get("change_day") >= -1:
-                    share["prediction"] = "Buy"
-                    confidence = round(share.get("change_day") * -1, 2) - round(random.uniform(0.1, 0.9), 2)
-                    share["confidence"] = clamp_confidence(confidence)
+            elif share.get("change_day") < 0 and share.get("change_day") >= -1:
+                share["prediction"] = "Buy"
+                confidence = round(share.get("change_day") * -1, 4) - round(random.uniform(0.01, 0.1), 4)
+                share["confidence"] = clamp_confidence(confidence)
 
-                elif share.get("change_day") < -1:
-                    share["prediction"] = "Buy"
-                    confidence = 1 - round(random.uniform(0.1, 0.9), 2)
-                    share["confidence"] = clamp_confidence(confidence)
+            elif share.get("change_day") < -1:
+                share["prediction"] = "Buy"
+                confidence = 1 - round(random.uniform(0.01, 0.1), 4)
+                share["confidence"] = clamp_confidence(confidence)
 
-                else:
-                    share["prediction"] = "Keep"
-                    share["confidence"] = 1
+            else:
+                share["prediction"] = "Keep"
+                share["confidence"] = 1
 
-                # Save the updated data back to the JSON file (if needed)
-                with open("assets/shares_list.json", "w") as file:
-                    json.dump(loaded_data, file, indent=4)
+            # Save the updated data back to the JSON file (if needed)
+            with open("assets/shares_list.json", "w") as file:
+                json.dump(loaded_data, file, indent=4)
 
-            except:
-                share["prediction"] = "N/A"
-                share["confidence"] = "N/A"
-                with open("assets/shares_list.json", "w") as file:
-                    json.dump(loaded_data, file, indent=4)
-
+        except:
+            share["prediction"] = "N/A"
+            share["confidence"] = "N/A"
+            with open("assets/shares_list.json", "w") as file:
+                json.dump(loaded_data, file, indent=4)
 
 # Run Flet app in the main thread
 if __name__ == "__main__":
