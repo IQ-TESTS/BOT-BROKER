@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import numpy as np
 import random
 import time
@@ -25,32 +24,6 @@ def get_share_info(ticker):
         open_price = hist['Open'].iloc[0]
         volume = hist['Volume'].iloc[-1]
         percentage_change = ((current_price - open_price) / open_price) * 100
-=======
-import aiohttp
-import asyncio
-from bs4 import BeautifulSoup
-
-async def get_share_info(ticker):
-    url = f'https://finance.yahoo.com/quote/{ticker}'
-    share_info = {}
-
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            content = await response.text()
-
-    soup = BeautifulSoup(content, 'html.parser')
-
-    # Extract current price
-    price_tag = soup.find('fin-streamer', {'data-field': 'regularMarketPrice'})
-    if price_tag:
-        try:
-            price_text = price_tag.text.strip().replace(',', '')  # Remove commas for float conversion
-            share_info['price'] = float(price_text)
-        except ValueError:
-            share_info['price'] = None  # Handle conversion error
-    else:
-        share_info['price'] = None
->>>>>>> 27c601ff6a7dc7d643b47abbc13c7cf92fdbdbb4
 
         return {
             'price': float(current_price),
@@ -66,7 +39,6 @@ async def get_share_info(ticker):
             'volume': None
         }
 
-<<<<<<< HEAD
 
 # Function to generate graph and return it as a base64-encoded image
 def get_share_graph(ticker, size):
@@ -123,6 +95,3 @@ def predict_stock_trend(ticker):
             return f"DOWN"
     except:
         return "Error while proccesing request"
-=======
-    return share_info
->>>>>>> 27c601ff6a7dc7d643b47abbc13c7cf92fdbdbb4
