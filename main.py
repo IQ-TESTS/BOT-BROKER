@@ -2,7 +2,11 @@ import flet as ft
 import json
 import random
 import time
+<<<<<<< HEAD
 from ShareInfoParser import get_share_info, get_share_graph, predict_stock_trend
+=======
+from ShareInfoParser import get_share_info
+>>>>>>> 27c601ff6a7dc7d643b47abbc13c7cf92fdbdbb4
 
 
 
@@ -380,6 +384,7 @@ async def ensure_data():
     # Iterate through each share in the loaded data
     for share in loaded_data.get("shares", []):
         try:
+<<<<<<< HEAD
             ticker = share.get("ticker")
             parsed_data = get_share_info(ticker)  # Ensure get_share_info is async
             print(parsed_data)
@@ -439,6 +444,53 @@ async def ensure_data():
     # Save the updated data back to the JSON file with rounded values
     with open("assets/shares_list.json", "w") as file:
         json.dump(loaded_data, file, indent=4)
+=======
+            ticker = share.get("ticker")  # Adjust based on your actual JSON structure
+            parsed_data = await get_share_info(ticker)  # Make sure get_share_info is async if necessary
+            print(parsed_data)
+
+            # Update the dictionary with the new data
+            share["price_dollars"] = parsed_data.get("price")
+            share["change_day"] = parsed_data.get("percentage_change")
+
+            def clamp_confidence(confidence):
+                # Ensure the confidence is between 0.05 and 9.9
+                return max(0.05, min(confidence, 9.93))
+
+            if share.get("change_day") > 0 and share.get("change_day") <= 1:
+                share["prediction"] = "Sell"
+                confidence = round(share.get("change_day"), 4) - round(random.uniform(0.01, 0.1), 4)
+                share["confidence"] = clamp_confidence(confidence)
+
+            elif share.get("change_day") > 1:
+                share["prediction"] = "Sell"
+                confidence = 1 - round(random.uniform(0.01, 0.1), 4)
+                share["confidence"] = clamp_confidence(confidence)
+
+            elif share.get("change_day") < 0 and share.get("change_day") >= -1:
+                share["prediction"] = "Buy"
+                confidence = round(share.get("change_day") * -1, 4) - round(random.uniform(0.01, 0.1), 4)
+                share["confidence"] = clamp_confidence(confidence)
+
+            elif share.get("change_day") < -1:
+                share["prediction"] = "Buy"
+                confidence = 1 - round(random.uniform(0.01, 0.1), 4)
+                share["confidence"] = clamp_confidence(confidence)
+
+            else:
+                share["prediction"] = "Keep"
+                share["confidence"] = 1
+
+            # Save the updated data back to the JSON file (if needed)
+            with open("assets/shares_list.json", "w") as file:
+                json.dump(loaded_data, file, indent=4)
+
+        except:
+            share["prediction"] = "N/A"
+            share["confidence"] = "N/A"
+            with open("assets/shares_list.json", "w") as file:
+                json.dump(loaded_data, file, indent=4)
+>>>>>>> 27c601ff6a7dc7d643b47abbc13c7cf92fdbdbb4
 
 # Run Flet app in the main thread
 if __name__ == "__main__":
