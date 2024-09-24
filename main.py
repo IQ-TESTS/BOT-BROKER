@@ -1,18 +1,21 @@
 import flet as ft
 import json
 import random
-from ShareInfoParser import get_share_info
+import time
+from ShareInfoParser import get_share_info, get_share_graph, predict_stock_trend
 
 
 
 class share_card_creator:
-    def __init__(self, name, image, price_dollars, change_day, prediction, confidence, new, page):
+    def __init__(self, name, image, price_dollars, change_day, prediction, confidence, volume, ticker, new, page):
         self.name = name
         self.image = image
         self.price_dollars = price_dollars
         self.change_day = change_day
         self.prediction = prediction
         self.confidence = confidence
+        self.volume = volume
+        self.ticker = ticker
         self.new = new
         self.page = page
 
@@ -25,7 +28,7 @@ class share_card_creator:
 
         # Check if confidence and price are integers
         confidence_text = (
-            str(round(self.confidence * 100, 2)) + "%"
+            str(round(self.confidence * 100, 3)) + "%"
             if isinstance(self.confidence, (int, float))
             else "N/A"
         )
@@ -36,24 +39,34 @@ class share_card_creator:
             else "N/A"
         )
 
+        volume_text = (
+            str(self.volume)
+            if isinstance(self.volume, (int, float))
+            else "N/A"
+        )
+
         return ft.Card(
             content=ft.Container(
                 content=ft.Column(
                     [
-                        ft.ListTile(
-                            leading=ft.Image(src=self.image),
-                            title=ft.Text(self.name),
-                            subtitle=new_text
-                        ),
-                        ft.Row(
-                            [
-                                ft.Text("Prediction: " + self.prediction),
-                                ft.Text("Confidence: " + confidence_text),
-                                ft.Text("Price: " + price_text),
-                                self.change_text()
-                            ],
-                            alignment=ft.MainAxisAlignment.END,
-                        ),
+                                ft.ListTile(
+                                    leading=ft.Image(src=self.image),
+                                    title=ft.Text(self.name),
+                                    subtitle=new_text,
+                                ),
+
+                                ft.Row(
+                                    [
+                                        ft.Text("Prediction: " + self.prediction),
+                                        ft.Text("Confidence: " + confidence_text),
+                                        # ft.Text("Volume: " + volume_text),
+                                        ft.Text("Price: " + price_text),
+                                        self.change_text(),
+                                        ft.IconButton(icon=ft.icons.INFO, icon_size=20, tooltip="More", on_click=lambda _: self.page.go(f"/about:{self.ticker}")),
+                                    ],
+                                    alignment=ft.MainAxisAlignment.END,
+                                ),
+
                     ]
                 ),
                 height=115,
@@ -98,13 +111,61 @@ async def main(page: ft.Page):
         "LemonMilkBold": "fonts/LemonMilkBold.otf",
     }
 
-    ensure_data()
 
     async def route_change(route):
         page.views.clear()
 
+        # if page.route == "/welcome":
+        #     page.views.append(
+        #         ft.View(
+        #             route="/welcome",
+        #             controls=[
+        #                 ft.Text("Bot Broker", font_family="LemonMilkBold", size=50),
+        #
+        #                 ft.Text(" "),
+        #                 ft.Text(" "),
+        #
+        #                 ft.Text("#1 AI POWERED BROKER", font_family="LemonMilkBold", size=30),
+        #                 ft.Text(" "),
+        #                 ft.Text("NEVER BEEN SO EASY", font_family="LemonMilkBold", size=30),
+        #
+        #                 ft.Text(" "),
+        #                 ft.Text(" "),
+        #
+        #                 ft.ElevatedButton("USE NOW")
+        #
+        #
+        #                 # ft.Row(
+        #                 #     controls=[ft.Text("#1 AI POWERED BROKER", font_family="LemonMilkBold", size=30), ft.Image(src="AI-LOGO.png", width=400, height=400)],
+        #                 #     alignment=ft.MainAxisAlignment.CENTER
+        #                 # )
+        #             ],
+        #             vertical_alignment=ft.MainAxisAlignment.START,
+        #             horizontal_alignment=ft.CrossAxisAlignment.CENTER
+        #         )
+        #     )
+
         # Приветственная страница
+
         if page.route == "/home":
+
+            page.views.append(
+                ft.View(
+                    route="/home",
+                    controls=[
+                        ft.Text("Updating data...", font_family="LemonMilkBold", size=30),
+                        ft.ProgressBar(),
+                    ],
+                    spacing=50,
+                    vertical_alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                )
+            )
+
+            page.update()
+
+            await ensure_data()
+
             data = get_json("shares_list")
 
             shares_list = ft.Column(
@@ -139,6 +200,8 @@ async def main(page: ft.Page):
                     share.get("change_day"),
                     share.get("prediction"),
                     share.get("confidence"),
+                    share.get("volume"),
+                    share.get("ticker"),
                     share.get("new"),
                     page
                 )
@@ -153,10 +216,14 @@ async def main(page: ft.Page):
                     share.get("change_day"),
                     share.get("prediction"),
                     share.get("confidence"),
+                    share.get("volume"),
+                    share.get("ticker"),
                     share.get("new"),
                     page
                 )
                 shares_list.controls.append(scc.create_card())
+
+            page.views.clear()
 
             # Add the sorted share cards to the view
             page.views.append(
@@ -164,6 +231,7 @@ async def main(page: ft.Page):
                     route='/home',
                     controls=[
                         ft.Text("Bot Broker", font_family="LemonMilkBold", size=50),
+                        ft.Text("AI-POWERED", font_family="LemonMilkBold", size=15),
                         ft.Text(" "),
                         shares_list,
                         ft.Card(
@@ -194,6 +262,103 @@ async def main(page: ft.Page):
 
             page.update()
 
+        elif str(page.route).startswith("/about:"):
+
+            ticker = str(page.route).split(":")[-1]
+
+            data = get_json("shares_list")
+
+            shares_data = data.load_json().get("shares", [])
+            share_data = next((share for share in shares_data if share["ticker"] == ticker), None)
+
+            def change_text(change_day):
+                try:
+                    if (change_day < 0):
+                        return ft.Text(str(change_day) + "%", color=ft.colors.RED)
+                    elif (change_day == 0):
+                        return ft.Text("+" + str(change_day) + "%", color=ft.colors.ORANGE)
+                    else:
+                        return ft.Text("+" + str(change_day) + "%", color=ft.colors.GREEN)
+                except:
+                    return ft.Text("+/- N/A")
+
+
+            # share_info = ft.Row(
+            #     controls=[
+            #         ft.Image(share_data.get("image")),
+            #         ft.Column(
+            #             controls=[
+            #                 ft.Text("Name:" + share_data.get("name")),
+            #                 ft.Text("Ticker:" + share_data.get("ticker")),
+            #                 ft.Text("Current price:" + str(share_data.get("price_dollars")) + "$"),
+            #                 change_text(share_data.get("change_day"))
+            #             ]
+            #         )
+            #     ]
+            # )
+
+            share_info = ft.Column(
+                controls=[],
+                expand=True,
+                scroll=ft.ScrollMode.AUTO
+            )
+
+            ai_analyse_text = ft.Text("AI analyse", size=35, font_family="LemonMilkBold")
+
+            def ai_analyse(event):
+                ai_analyse_text.value = "Analyse would appear here..."
+                page.update()
+                ai_analyse_text.value = predict_stock_trend(ticker)
+                page.update()
+
+            share_graph = get_share_graph(ticker, 10)
+            ai_button = ft.IconButton(icon=ft.icons.AUTO_GRAPH, on_click=ai_analyse, icon_size=35, tooltip="AI analyse")
+
+            back_button = ft.ElevatedButton("Back to home page", on_click=lambda _: page.go("/home"))
+
+            scc = share_card_creator(
+                share_data.get("name"),
+                share_data.get("image"),
+                share_data.get("price_dollars"),
+                share_data.get("change_day"),
+                share_data.get("prediction"),
+                share_data.get("confidence"),
+                share_data.get("volume"),
+                share_data.get("ticker"),
+                share_data.get("new"),
+                page
+            )
+            share_info.controls.append(scc.create_card())
+
+            page.views.append(
+                ft.View(
+                    route="/about:",
+                    controls=[
+                        share_info,
+                        ft.Row(
+                            controls=[
+                                ft.Column(
+                                    controls=[
+                                        share_graph,
+                                        ft.Row(
+                                            controls=[
+                                                ai_analyse_text,
+                                                ai_button
+                                            ],
+                                        ),
+
+                                        back_button,
+                                    ],
+                                )
+                            ],
+                        )
+                    ],
+                    vertical_alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.START,
+                    scroll=ft.ScrollMode.AUTO
+                )
+            )
+
         page.update()
 
     # Анимация перехода между страницами
@@ -208,59 +373,72 @@ async def main(page: ft.Page):
     await page.go_async('/home')
 
 
-def ensure_data():
-        data = get_json("shares_list")
-        loaded_data = data.load_json()
+async def ensure_data():
+    data = get_json("shares_list")
+    loaded_data = data.load_json()
 
-        # Iterate through each share in the loaded data
-        for share in loaded_data.get("shares", []):
-            try:
-                ticker = share.get("ticker")  # Adjust based on your actual JSON structure
-                parsed_data = get_share_info(ticker)
-                print(parsed_data)
+    # Iterate through each share in the loaded data
+    for share in loaded_data.get("shares", []):
+        try:
+            ticker = share.get("ticker")
+            parsed_data = get_share_info(ticker)  # Ensure get_share_info is async
+            print(parsed_data)
 
-                # Update the dictionary with the new data
-                share["price_dollars"] = parsed_data.get("price")
-                share["change_day"] = parsed_data.get("percentage_change")
+            # Check for valid parsed data
+            if parsed_data.get("price") is None or parsed_data.get("percentage_change") is None:
+                raise ValueError(f"No valid data for ticker {ticker}")
+
+            # Apply rounding directly before saving to the dictionary
+            share["price_dollars"] = round(float(parsed_data.get("price")), 4)
+            share["change_day"] = round(float(parsed_data.get("percentage_change")), 4)
+            share["volume"] = int(parsed_data.get("volume"))
+
+        except Exception as e:
+            print(f"Error processing share data for {share.get('name')}: {str(e)}")
+
+            # Fall back to last known good data from JSON if available
+            last_valid_price = share.get("price_dollars", None)
+            last_valid_change_day = share.get("change_day", None)
+            last_valid_volume = share.get("volume", None)
+
+            if last_valid_price is not None and last_valid_change_day is not None:
+                share["price_dollars"] = last_valid_price
+                share["change_day"] = last_valid_change_day
+                share["volume"] = last_valid_volume if last_valid_volume is not None else "N/A"
+
+                # Calculate prediction and confidence based on last known data
+                change_day = last_valid_change_day
 
                 def clamp_confidence(confidence):
-                    # Ensure the confidence is between 0.05 and 9.9
-                    return max(0.05, min(confidence, 9.93))
+                    return round(max(0.05, min(confidence, 9.93)), 4)
 
-                if share.get("change_day") > 0 and share.get("change_day") <= 1:
+                if change_day > 0 and change_day <= 1:
                     share["prediction"] = "Sell"
-                    confidence = round(share.get("change_day"), 2) - round(random.uniform(0.1, 0.9), 2)
+                    confidence = round(change_day, 4) - round(random.uniform(0.01, 0.1), 4)
                     share["confidence"] = clamp_confidence(confidence)
-
-                elif share.get("change_day") > 1:
+                elif change_day > 1:
                     share["prediction"] = "Sell"
-                    confidence = 1 - round(random.uniform(0.1, 2.9), 2)
+                    confidence = 1 - round(random.uniform(0.01, 0.1), 4)
                     share["confidence"] = clamp_confidence(confidence)
-
-                elif share.get("change_day") < 0 and share.get("change_day") >= -1:
+                elif change_day < 0 and change_day >= -1:
                     share["prediction"] = "Buy"
-                    confidence = round(share.get("change_day") * -1, 2) - round(random.uniform(0.1, 0.9), 2)
+                    confidence = round(abs(change_day), 4) - round(random.uniform(0.01, 0.1), 4)
                     share["confidence"] = clamp_confidence(confidence)
-
-                elif share.get("change_day") < -1:
+                elif change_day < -1:
                     share["prediction"] = "Buy"
-                    confidence = 1 - round(random.uniform(0.1, 0.9), 2)
+                    confidence = 1 - round(random.uniform(0.01, 0.1), 4)
                     share["confidence"] = clamp_confidence(confidence)
-
                 else:
                     share["prediction"] = "Keep"
-                    share["confidence"] = 1
-
-                # Save the updated data back to the JSON file (if needed)
-                with open("assets/shares_list.json", "w") as file:
-                    json.dump(loaded_data, file, indent=4)
-
-            except:
+                    share["confidence"] = round(1, 4)
+            else:
                 share["prediction"] = "N/A"
                 share["confidence"] = "N/A"
-                with open("assets/shares_list.json", "w") as file:
-                    json.dump(loaded_data, file, indent=4)
+                share["volume"] = "N/A"
 
+    # Save the updated data back to the JSON file with rounded values
+    with open("assets/shares_list.json", "w") as file:
+        json.dump(loaded_data, file, indent=4)
 
 # Run Flet app in the main thread
 if __name__ == "__main__":
