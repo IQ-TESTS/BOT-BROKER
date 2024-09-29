@@ -2,6 +2,7 @@ import numpy as np
 import random
 import time
 from flet.plotly_chart import PlotlyChart  # Import PlotlyChart from the correct submodule
+import flet as ft
 import yfinance as yf
 import plotly.graph_objs as go
 
@@ -40,34 +41,42 @@ def get_share_info(ticker):
         }
 
 
-# Function to generate graph and return it as a base64-encoded image
-def get_share_graph(ticker, size):
+def get_share_graph(ticker, size, bgcol):
     stock = yf.Ticker(ticker)
-    hist = stock.history(period='5d', interval='1h')  # 5 days of hourly data
+    hist = stock.history(period='1mo', interval='1d')
 
     if hist.empty:
-        return None
+        return ft.Text(f"No data available for ${ticker}", color=ft.colors.RED)
 
-    # Create a Plotly line chart
+    # Proceed with generating the graph if data is available
     fig = go.Figure()
-
-    # Add the trace for the 'Close' prices
     fig.add_trace(go.Scatter(x=hist.index, y=hist['Close'], mode='lines', name='Closing Price'))
 
-    # Set chart title and axis labels
+    # Generate ticks for every 5 days
+    tick_values = hist.index[::5]  # Get every 5th date from the index
+
+    # Set custom background color using bgcol argument
     fig.update_layout(
-        title=f'{ticker} - Last 5 Days Closing Prices',
+        title=f'{ticker} - Last Month Closing Prices',
         xaxis_title='Date',
         yaxis_title='Price (USD)',
         showlegend=True,
-        template='plotly_dark',  # Optional: set a dark theme
+        paper_bgcolor=bgcol,  # Set the outer (paper) background color
+        template='plotly_dark',  # Optional: keep dark theme
+        xaxis=dict(
+            tickmode='array',  # Set tick mode to array
+            tickvals=tick_values,  # Use the generated tick values
+            ticktext=[date.strftime("%Y-%m-%d") for date in tick_values],  # Format tick labels
+            tickangle=-45,  # Rotate labels for better visibility
+        )
     )
 
-    # Format the X-axis ticks and adjust for readability
-    fig.update_xaxes(tickformat="%Y-%m-%d", tickangle=-45, dtick="1d")  # Adjust format and rotation
-
-    # Return Flet PlotlyChart with the generated figure
     return PlotlyChart(fig, original_size=size)
+
+
+
+
+
 
 def predict_stock_trend(ticker):
     try:
