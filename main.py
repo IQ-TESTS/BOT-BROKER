@@ -1,12 +1,12 @@
 import flet as ft
-from ShareInfoParser import get_share_graph, get_share_info
+from ShareInfoParser import get_share_graph, get_share_info, update_graph
 import asyncio
 import json
 import random
 import math
-
-
 def main(page: ft.Page):
+
+    page.theme_mode = "dark"
 
     page.fonts = {
         "L": "fonts/LemonMilkBold.otf", "M": "fonts/Gothic60-Regular.otf",
@@ -95,11 +95,11 @@ def main(page: ft.Page):
                     img_container,
                     ft.Column(
                         controls=[
-                            ft.Text(name, font_family="M", size=20),
-                            ft.Text(f"${ticker}", font_family="M", size=12),
+                            ft.Text(name, font_family="M", size=20, expand_loose=True),
+                            ft.Text(f"${ticker}", font_family="M", size=12, expand_loose=True),
                         ],
                         spacing=1,
-                        expand=True
+                        expand_loose=True
                     ),
                     # Bottom right row with predictions, price, and button
                     ft.Row(
@@ -112,17 +112,20 @@ def main(page: ft.Page):
                                     size=15),
                             icon_button  # Use the IconButton reference here
                         ],
-                        alignment=ft.MainAxisAlignment.END
+                        alignment=ft.MainAxisAlignment.END,
+                        expand_loose=True,
                     )
                 ],
+                expand_loose=True
             ),
+            expand_loose=True,
             bgcolor=ft.colors.GREY_900,
             width=700,
             height=100,  # Default height of the simple card
             padding=10,
             border_radius=20,
             shadow=ft.BoxShadow(blur_radius=5),  # Adds shadow to emphasize layering
-            animate=ft.Animation(duration=500, curve=ft.AnimationCurve.EASE_IN_OUT)  # Add animation here
+            animate=ft.Animation(duration=500, curve=ft.AnimationCurve.EASE_IN_OUT)  # Add animation her
         )
 
         # Additional card (initially hidden, height 0)
@@ -130,7 +133,7 @@ def main(page: ft.Page):
             content=ft.Column(
                 controls=[
                     ft.Text("Graph"),
-                    get_share_graph(ticker, 0.5, "#000000")
+                    get_share_graph(ticker, (220, 220),  "#ebf0f2")
                 ],
                 scroll=ft.ScrollMode.AUTO
             ),
@@ -158,7 +161,7 @@ def main(page: ft.Page):
 
     async def load_bond_cards():
         # Simulating a delay to allow the "Updating data..." text to display
-        await asyncio.sleep(1)  # You can adjust the delay as needed
+        await asyncio.sleep(0.1)  # You can adjust the delay as needed
 
         with open("assets/shares_list.json", "r") as file:
             data = json.load(file)
@@ -184,13 +187,11 @@ def main(page: ft.Page):
                     share.get("change_day")
                 )
             )
-            # Adding a delay before showing each card
-            await asyncio.sleep(0.1)  # Adjust the delay as needed for effect
 
         return bond_cards
 
     async def load_best_bond_cards():
-        await asyncio.sleep(1)  # You can adjust the delay as needed
+        await asyncio.sleep(0.1)  # You can adjust the delay as needed
 
         with open("assets/shares_list.json", "r") as file:
             data = json.load(file)
@@ -217,8 +218,6 @@ def main(page: ft.Page):
                     share.get("change_day")
                 )
             )
-            # Adding a delay before showing each card
-            await asyncio.sleep(0.1)  # Adjust the delay as needed for effect
 
         return bond_cards
 
@@ -230,8 +229,8 @@ def main(page: ft.Page):
         for share in data.get("shares", []):
             try:
                 ticker = share.get("ticker")
+                update_graph(ticker, "#000000", "white")
                 parsed_data = get_share_info(ticker)  # Ensure get_share_info is async
-                print(parsed_data)
 
                 # Check for valid parsed data
                 if parsed_data.get("price") is None or parsed_data.get("percentage_change") is None:
@@ -284,6 +283,65 @@ def main(page: ft.Page):
                     share["prediction"] = "N/A"
                     share["confidence"] = "N/A"
                     share["volume"] = "N/A"
+
+        for share in data.get("top_shares", []):
+            try:
+                ticker = share.get("ticker")
+                parsed_data = get_share_info(ticker)  # Ensure get_share_info is async
+
+                # Check for valid parsed data
+                if parsed_data.get("price") is None or parsed_data.get("percentage_change") is None:
+                    raise ValueError(f"No valid data for ticker {ticker}")
+
+                # Apply rounding directly before saving to the dictionary
+                share["price_dollars"] = round(float(parsed_data.get("price")), 4)
+                share["change_day"] = round(float(parsed_data.get("percentage_change")), 4)
+                share["volume"] = int(parsed_data.get("volume"))
+
+            except Exception as e:
+                print(f"Error processing share data for {share.get('name')}: {str(e)}")
+
+                # Fall back to last known good data from JSON if available
+                last_valid_price = share.get("price_dollars", None)
+                last_valid_change_day = share.get("change_day", None)
+                last_valid_volume = share.get("volume", None)
+
+                if last_valid_price is not None and last_valid_change_day is not None:
+                    share["price_dollars"] = last_valid_price
+                    share["change_day"] = last_valid_change_day
+                    share["volume"] = last_valid_volume if last_valid_volume is not None else "N/A"
+
+                    # Calculate prediction and confidence based on last known data
+                    change_day = last_valid_change_day
+
+                    def clamp_confidence(confidence):
+                        return round(max(0.05, min(confidence, 9.93)), 4)
+
+                    if change_day > 0 and change_day <= 1:
+                        share["prediction"] = "Sell"
+                        confidence = round(change_day, 4) - round(random.uniform(0.01, 0.1), 4)
+                        share["confidence"] = clamp_confidence(confidence)
+                    elif change_day > 1:
+                        share["prediction"] = "Sell"
+                        confidence = 1 - round(random.uniform(0.01, 0.1), 4)
+                        share["confidence"] = clamp_confidence(confidence)
+                    elif change_day < 0 and change_day >= -1:
+                        share["prediction"] = "Buy"
+                        confidence = round(abs(change_day), 4) - round(random.uniform(0.01, 0.1), 4)
+                        share["confidence"] = clamp_confidence(confidence)
+                    elif change_day < -1:
+                        share["prediction"] = "Buy"
+                        confidence = 1 - round(random.uniform(0.01, 0.1), 4)
+                        share["confidence"] = clamp_confidence(confidence)
+                    else:
+                        share["prediction"] = "Keep"
+                        share["confidence"] = round(1, 4)
+                else:
+                    share["prediction"] = "N/A"
+                    share["confidence"] = "N/A"
+                    share["volume"] = "N/A"
+
+
 
         # Save the updated data back to the JSON file with rounded values
         with open("assets/shares_list.json", "w") as file:
@@ -399,6 +457,7 @@ def main(page: ft.Page):
 
             page.update()  # Final update to render the new view
 
+            await asyncio.sleep(1)
             await ensure_data()
 
         elif page.route == "/about":
@@ -467,6 +526,8 @@ def main(page: ft.Page):
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER
                 )
             )
+
+
 
     def view_pop(view):
         page.views.pop()

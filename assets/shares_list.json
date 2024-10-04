@@ -5,21 +5,21 @@
             "name": "Saker Aviation Servies inc",
             "image": "https://media.licdn.com/dms/image/v2/C4D0BAQHFrM1oSmZf7Q/company-logo_200_200/company-logo_200_200/0/1631348318578?e=2147483647&v=beta&t=a5haqmYXMh3xSbD-MeG9tZNDIqevmznAvEoHaWve3v8",
             "price_dollars": 10.6,
-            "change_day": -2.35,
-            "prediction": "Buy",
-            "confidence": 0.9252,
+            "change_day": 0.0,
+            "prediction": "Keep",
+            "confidence": 1,
             "new": true,
             "pattern": "Bullish Doji Star",
-            "volume": "N/A"
+            "volume": 0
         },
         {
             "ticker": "^BVSP",
             "name": "IBOVESPA",
             "image": "https://s3-symbol-logo.tradingview.com/b3-on-nm--600.png",
-            "price_dollars": 132920.0312,
-            "change_day": -0.0675,
+            "price_dollars": 131721.7031,
+            "change_day": 0.0381,
             "prediction": "Buy",
-            "confidence": 0.1045,
+            "confidence": 0.05,
             "new": false,
             "pattern": "Not avaliable",
             "volume": 0
@@ -28,13 +28,13 @@
             "ticker": "PNRG",
             "name": "PrimeEnergy Resources Corp",
             "image": "https://media.licdn.com/dms/image/C4E1BAQFmS2rHdS0SEA/company-background_10000/0/1585110248426/prime_energy_resources_cover?e=2147483647&v=beta&t=qlUhgjzbV-qrRQxVKsPyAFYhD8SoL4Ame9v5fTdTLNM&s",
-            "price_dollars": 140.11,
-            "change_day": 0.8711,
-            "prediction": "Buy",
-            "confidence": 0.9329,
+            "price_dollars": 152.99,
+            "change_day": -0.0065,
+            "prediction": "Keep",
+            "confidence": 1,
             "new": false,
             "pattern": "Not avaliable",
-            "volume": 1028
+            "volume": 0
         }
     ],
     "shares": [
@@ -43,21 +43,21 @@
             "name": "Saker Aviation Servies inc",
             "image": "https://media.licdn.com/dms/image/v2/C4D0BAQHFrM1oSmZf7Q/company-logo_200_200/company-logo_200_200/0/1631348318578?e=2147483647&v=beta&t=a5haqmYXMh3xSbD-MeG9tZNDIqevmznAvEoHaWve3v8",
             "price_dollars": 10.6,
-            "change_day": -2.35,
-            "prediction": "Buy",
-            "confidence": 0.9301,
+            "change_day": 0.0,
+            "prediction": "Keep",
+            "confidence": 1,
             "new": true,
             "pattern": "Bullish Doji Star",
-            "volume": "N/A"
+            "volume": 0
         },
         {
             "ticker": "^BVSP",
             "name": "IBOVESPA",
             "image": "https://s3-symbol-logo.tradingview.com/b3-on-nm--600.png",
-            "price_dollars": 132920.0312,
-            "change_day": -0.0675,
-            "prediction": "Buy",
-            "confidence": 0.1045,
+            "price_dollars": 131721.7031,
+            "change_day": 0.0381,
+            "prediction": "Sell",
+            "confidence": 0.6495,
             "new": false,
             "pattern": "Not avaliable",
             "volume": 0
@@ -66,13 +66,13 @@
             "ticker": "PNRG",
             "name": "PrimeEnergy Resources Corp",
             "image": "https://media.licdn.com/dms/image/C4E1BAQFmS2rHdS0SEA/company-background_10000/0/1585110248426/prime_energy_resources_cover?e=2147483647&v=beta&t=qlUhgjzbV-qrRQxVKsPyAFYhD8SoL4Ame9v5fTdTLNM&s",
-            "price_dollars": 140.11,
-            "change_day": 0.8711,
-            "prediction": "Buy",
-            "confidence": 0.9329,
+            "price_dollars": 152.99,
+            "change_day": -0.0065,
+            "prediction": "Keep",
+            "confidence": 1,
             "new": false,
             "pattern": "Not avaliable",
-            "volume": 1028
+            "volume": 0
         }
     ]
 }
