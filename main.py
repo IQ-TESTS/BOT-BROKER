@@ -85,21 +85,19 @@ def main(page: ft.Page):
             padding=0
         )
 
-        # Simple card container
         icon_button = ft.IconButton(icon=arrow_icon, on_click=toggle_additional_card,
                                     tooltip="Show Graph")  # Store a reference to the IconButton
-
         card = ft.Container(
             content=ft.Row(
                 controls=[
                     img_container,
                     ft.Column(
                         controls=[
-                            ft.Text(name, font_family="M", size=20, expand_loose=True),
-                            ft.Text(f"${ticker}", font_family="M", size=12, expand_loose=True),
+                            ft.Text(name, font_family="M", size=20),
+                            ft.Text(f"${ticker}", font_family="M", size=12),
                         ],
                         spacing=1,
-                        expand_loose=True
+                        expand=True
                     ),
                     # Bottom right row with predictions, price, and button
                     ft.Row(
@@ -112,20 +110,17 @@ def main(page: ft.Page):
                                     size=15),
                             icon_button  # Use the IconButton reference here
                         ],
-                        alignment=ft.MainAxisAlignment.END,
-                        expand_loose=True,
+                        alignment=ft.MainAxisAlignment.END
                     )
                 ],
-                expand_loose=True
             ),
-            expand_loose=True,
             bgcolor=ft.colors.GREY_900,
             width=700,
             height=100,  # Default height of the simple card
             padding=10,
             border_radius=20,
             shadow=ft.BoxShadow(blur_radius=5),  # Adds shadow to emphasize layering
-            animate=ft.Animation(duration=500, curve=ft.AnimationCurve.EASE_IN_OUT)  # Add animation her
+            animate=ft.Animation(duration=500, curve=ft.AnimationCurve.EASE_IN_OUT)  # Add animation here
         )
 
         # Additional card (initially hidden, height 0)
@@ -133,7 +128,7 @@ def main(page: ft.Page):
             content=ft.Column(
                 controls=[
                     ft.Text("Graph"),
-                    get_share_graph(ticker, (220, 220),  "#ebf0f2")
+                    get_share_graph(ticker, 0.5, "#000000")
                 ],
                 scroll=ft.ScrollMode.AUTO
             ),
@@ -457,7 +452,7 @@ def main(page: ft.Page):
 
             page.update()  # Final update to render the new view
 
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.1)
             await ensure_data()
 
         elif page.route == "/about":
