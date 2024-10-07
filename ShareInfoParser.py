@@ -78,10 +78,6 @@ def update_graph(ticker, bgcol, text_color):
 
         # Set custom background color and customize layout
         fig.update_layout(
-            title={
-                'text': f'{ticker} - Last Month Candlestick Prices',
-                'font': {'color': text_color, 'size': 18},  # Set title text color and size
-            },
             xaxis_title={
                 'text': 'Date',
                 'font': {'color': text_color, 'size': 14}  # Set x-axis title text color and size
@@ -122,7 +118,7 @@ def update_graph(ticker, bgcol, text_color):
     with open("assets/shares_graphs.json", "w") as f:
         json.dump(charts_dict, f, indent=4)  # Save with indentation for readability
 
-def get_share_graph(ticker, size, text_color):
+def get_share_graph(ticker, size, text_color, graph_height=None):
     # Load the JSON data from the specified file
     try:
         with open("assets/shares_graphs.json", "r") as f:
@@ -156,15 +152,25 @@ def get_share_graph(ticker, size, text_color):
                 name='Price'
             ))
 
-    # Set layout attributes
+    # Set layout attributes from JSON data
     fig.update_layout(chart_data['layout'])
 
     # Set font color for all text elements
     fig.update_layout(font=dict(color=text_color))
 
-    # Return the graph in Plotly chart format
-    return PlotlyChart(fig, original_size=size, expand_loose=True)
+    # If a custom graph height is provided, update the layout height
+    if graph_height:
+        # Adjust the plot height but limit the area where the actual plot is rendered
+        fig.update_layout(
+            height=graph_height,
+            yaxis=dict(
+                domain=[0.1, 0.9],  # Set domain for the plot area to avoid text stretching
+                automargin=True  # Automatically adjust margins to fit the text
+            )
+        )
 
+    # Return the graph in Plotly chart format
+    return PlotlyChart(fig, original_size=size)
 
 def predict_stock_trend(ticker):
     try:
